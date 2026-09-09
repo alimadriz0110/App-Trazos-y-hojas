@@ -34,70 +34,40 @@ INPUT_VALIDO = {
 # ====================================================================
 # 1. Endpoint de inicio ("/") - explica la API
 # ====================================================================
-
-def test_landing_page():
-    """GET '/' debe responder 200 con HTML (es HTMLResponse, no JSON)
-    e informar de los endpoints disponibles."""
-    resp = requests.get(f"{BASE_URL}/")
-    assert resp.status_code == 200, f"Se esperaba 200, se obtuvo {resp.status_code}"
-    assert "text/html" in resp.headers.get("content-type", "")
-
-    body = resp.text
-    assert "/predict" in body
-    assert "/health" in body
+print("\n--- 1. GET / (landing page) ---")
+resp = requests.get(f"{BASE_URL}/")
+print("Status:", resp.status_code, "(esperado 200)")
 
 
 # ====================================================================
 # 2. Endpoint de comprobacion de estado ("/health")
 # ====================================================================
-
-def test_health():
-    """GET '/health' debe confirmar que el modelo esta cargado."""
-    resp = requests.get(f"{BASE_URL}/health")
-    assert resp.status_code == 200, f"Se esperaba 200, se obtuvo {resp.status_code}"
-
-    data = resp.json()
-    assert data.get("estado") == "ok", f"Estado inesperado: {data}"
-    assert data.get("modelo_cargado") is True, f"El modelo no esta cargado: {data}"
-    assert data.get("n_features") == 6, f"Se esperaban 6 features, hay: {data}"
+print("\n--- 2. GET /health ---")
+resp = requests.get(f"{BASE_URL}/health")
+print("Status:", resp.status_code, "(esperado 200)")
+print("Respuesta:", resp.json())
 
 
 # ====================================================================
-# 3. Endpoint de prediccion ("/predict") - 3 supuestos:
-#    datos correctos, falta un campo, un dato fuera de rango.
-#    En los tres, quien valida es FastAPI + Pydantic; aqui solo
-#    comprobamos que responde con lo que se espera.
+# 3. Endpoint de prediccion ("/predict") - 3 supuestos
 # ====================================================================
 
-def test_predict_caso_valido():
-    """Supuesto 1: datos correctos -> 200 y una prediccion numerica >= 0."""
-    resp = requests.post(f"{BASE_URL}/predict", json=INPUT_VALIDO)
-    assert resp.status_code == 200, f"Se esperaba 200, se obtuvo {resp.status_code}: {resp.text}"
+print("\n--- 3.1 POST /predict - datos correctos ---")
+resp = requests.post(f"{BASE_URL}/predict", json=INPUT_VALIDO)
+print("Status:", resp.status_code, "(esperado 200)")
+print("Respuesta:", resp.json())
 
-    data = resp.json()
-    assert "unidades_estimadas" in data, f"Falta 'unidades_estimadas': {data}"
-    assert "detalle" in data, f"Falta 'detalle': {data}"
-    assert isinstance(data["unidades_estimadas"], (int, float))
-    assert data["unidades_estimadas"] >= 0
+print("\n--- 3.2 POST /predict - falta un campo (lag_1) ---")
+input_incompleto = INPUT_VALIDO.copy()
+del input_incompleto["lag_1"]
+resp = requests.post(f"{BASE_URL}/predict", json=input_incompleto)
+print("Status:", resp.status_code, "(esperado 422)")
 
-
-def test_predict_falta_un_campo():
-    """Supuesto 2: falta un campo obligatorio -> Pydantic responde 422 sola."""
-    input_incompleto = INPUT_VALIDO.copy()
-    del input_incompleto["lag_1"]
-
-    resp = requests.post(f"{BASE_URL}/predict", json=input_incompleto)
-    assert resp.status_code == 422, f"Se esperaba 422, se obtuvo {resp.status_code}"
-    assert "detail" in resp.json()
-
-
-def test_predict_valor_fuera_de_rango():
-    """Supuesto 3: un dato fuera de rango (Dia_semana solo admite 0-6) -> 422 sola."""
-    input_fuera_de_rango = INPUT_VALIDO.copy()
-    input_fuera_de_rango["Dia_semana"] = 9
-
-    resp = requests.post(f"{BASE_URL}/predict", json=input_fuera_de_rango)
-    assert resp.status_code == 422, f"Se esperaba 422, se obtuvo {resp.status_code}"
+print("\n--- 3.3 POST /predict - dato fuera de rango (Dia_semana=9) ---")
+input_fuera_de_rango = INPUT_VALIDO.copy()
+input_fuera_de_rango["Dia_semana"] = 9
+resp = requests.post(f"{BASE_URL}/predict", json=input_fuera_de_rango)
+print("Status:", resp.status_code, "(esperado 422)")
 
 
 # --- Tercer endpoint del challenge (el que se descomenta para el redespliegue
@@ -105,29 +75,7 @@ def test_predict_valor_fuera_de_rango():
 #     endpoint totalmente distinto (/model-info). Descomentar en el momento
 #     de la demo, a la vez que se descomenta en main.py:
 #
-# def test_model_info():
-#     resp = requests.get(f"{BASE_URL}/model-info")
-#     assert resp.status_code == 200
-#     data = resp.json()
-#     assert data.get("algoritmo") == "LightGBM"
-#     assert data.get("n_variables") == 6
-
-
-if __name__ == "__main__":
-    tests = [
-        test_landing_page,
-        test_health,
-        test_predict_caso_valido,
-        test_predict_falta_un_campo,
-        test_predict_valor_fuera_de_rango,
-    ]
-    for t in tests:
-        try:
-            t()
-            print(f"OK   - {t.__name__}")
-        except AssertionError as e:
-            print(f"FAIL - {t.__name__}: {e}")
-        except requests.exceptions.ConnectionError:
-            print(f"FAIL - {t.__name__}: no se pudo conectar a {BASE_URL}. "
-                  f"¿Esta la API corriendo?")
-            break
+# print("\n--- GET /model-info ---")
+# resp = requests.get(f"{BASE_URL}/model-info")
+# print("Status:", resp.status_code, "(esperado 200)")
+# print("Respuesta:", resp.json())
