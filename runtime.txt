@@ -1,2 +1,1 @@
-python-3.14
-pip install --upgrade pip
+python-3.11.9
