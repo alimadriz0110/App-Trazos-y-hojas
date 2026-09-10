@@ -17,7 +17,7 @@ espera en cada caso.
 import os
 import requests
 
-BASE_URL = os.environ.get("BASE_URL", "https://app-trazos-y-hojas-0q2n.onrender.com")
+BASE_URL = ("https://app-trazos-y-hojas-0q2n.onrender.com")
 
 # Mismo ejemplo que Tere puso en el esquema Pydantic (DatosProducto.model_config),
 # asi nos aseguramos de que es un caso que el propio esquema considera valido.
