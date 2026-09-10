@@ -70,12 +70,4 @@ resp = requests.post(f"{BASE_URL}/predict", json=input_fuera_de_rango)
 print("Status:", resp.status_code, "(esperado 422)")
 
 
-# --- Tercer endpoint del challenge (el que se descomenta para el redespliegue
-#     en directo) - no confundir con los "3 supuestos" de arriba, es un
-#     endpoint totalmente distinto (/model-info). Descomentar en el momento
-#     de la demo, a la vez que se descomenta en main.py:
-#
-# print("\n--- GET /model-info ---")
-# resp = requests.get(f"{BASE_URL}/model-info")
-# print("Status:", resp.status_code, "(esperado 200)")
-# print("Respuesta:", resp.json())
+
