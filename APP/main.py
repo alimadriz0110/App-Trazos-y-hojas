@@ -153,11 +153,11 @@ def predict(datos: DatosProducto):
 # Descomentar durante la presentación, hacer commit y redesplegar.
 # Devuelve qué variables usa el modelo y en qué orden.
 # ----------------------------------------------------------------------
-# @app.get("/model-info")
-# def model_info():
-#     return {
-#         "algoritmo": "LightGBM",
-#         "n_variables": len(features),
-#         "variables": list(features),
-#         "transformacion_target": "log1p (revertida con expm1)",
-#     }
+@app.get("/model-info")
+def model_info():
+     return {
+         "algoritmo": "LightGBM",
+         "n_variables": len(features),
+         "variables": list(features),
+         "transformacion_target": "log1p (revertida con expm1)",
+     }
